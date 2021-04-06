@@ -35,14 +35,14 @@ Get Covered supports multiple products through a single API.  To differentiate b
 
 A *Policy Type* is specified on a *Policy Application*, *Policy Quote* and a *Policy* but its **ID**.  Use the following reference to select which product the request is relevant to.
 
-ID | Title | Description
---------- | ------- | ----------- 
-1 | Renters | An HO4 product covering renters at a residential address
-2 | Master Policy | TLL product
-3 | Master Policy Coverage | Coverage issued on behalf of a Master Policy
-4 | Commercial | Business Owner Policy
-4 | Rent Guarantee | A stupid product
-5 | Renters Deposit Bond | A product I don't know how to describe
+ID | Title | Slug | Description
+--------- | ------- | ------- | ----------- 
+1 | Renters | residential | An HO4 product covering renters at a residential address
+2 | Master Policy | master-policy | TLL product
+3 | Master Policy Coverage | master-policy-coverage | Coverage issued on behalf of a Master Policy
+4 | Commercial | commercial | Business Owner Policy
+4 | Rent Guarantee | rent-guarantee | A stupid product
+5 | Renters Deposit Bond | deposit | A product I don't know how to describe
 
 # Billing Strategies
 ## Introduction
@@ -88,6 +88,15 @@ billing_strategies_request = HTTParty.get("https://api.getcoveredinsurance.com/v
 ```
 
 Returns all Billing Strategies for an **Agency**, **Carrier**, **Policy Type** combination.
+
+### HTTP Request
+`GET http://api.getcoveredinsurance.com/v2/billing-strategies?query_params`
+
+Parameter | Required | Description | Options
+--------- | ------- | ----------- | -----------
+agency_id | true | ID of your **Agency** organization | 
+policy_type | true | SLUG of **Policy Type**, defaults to residential | residential, commercial, rent-guarantee, deposit
+carrier_id | false | ID of the **Carrier** | 
 
 # Insurables
 ## Introduction 
@@ -160,6 +169,9 @@ get_or_create_request = HTTParty.post("https://api.getcoveredinsurance.com/v2/in
 ```
 
 The **Insurable** Get or Create request finds an existing **Insurable** by its address or creates a new one in the event that it does not exist.
+
+### HTTP Request
+`POST https://api.getcoveredinsurance.com/v2/insurables/get-or-create`
 
 ### Get or Create Request Parameters
 Parameter | Required | Description | Options
@@ -521,6 +533,51 @@ get_insurable_rates_request = HTTParty.post("https://api.getcoveredinsurance.com
     ]
 }
 ```
+
+The **Insurable** Insurable Rates request finds available coverages for an Insurable identified during the [Get Or Create](#get-or-create) request.  This section is only for Renters Policies ([Policy Type ID: 1](#policy-types)).
+   
+### HTTP Request
+`POST https://api.getcoveredinsurance.com/v2/policy-applications/get-coverage-options`
+
+### Get Coverage Options Request Parameters
+Parameter | Required | Description | Options
+--------- | ------- | ----------- | -----------
+insurable_id | true | The **ID** of the [**Insurable**](#insurables) identified int the [Get or Create](#get-or-create) request |
+agency_id | true | The **ID** of the **Agency** for your organization |  
+billing_strategy_id | true | The **ID** of the [**Billing Strategy**](#get-all-billing-strategies) being used on the [**Policy Application**](#policy-applications) |
+effective_date | true | Date coverage will begin | 
+additional_insured | true | Number of additional individuals that will be covered under policy, defaults to 0 | 1, 2, 3, 4, 5, 6, 7 
+coverage_selections | false | Array of hashes, see example below |
+estimate_premium | true | Boolean to return an estimated premium | true, false
+
+### Coverage Selections
+To add a coverage to the coverage selections array, use one of the following hash formats.  Resending the Get Insurable Rates request with **coverage_selections** may change the available rates.
+
+Adding a Coverage that has multiple options:
+
+`{ "categy" : "coverage", "uid": "1003", "selection": "30000.0" }`
+
+Adding a Coverage that has no options:
+
+`{ "category" : "coverage", "uid" : "1076", "selection" : true }`
+
+### Get Coverage Options Response Parameters
+Parameter  | Description
+--------- | -----------
+valid | Informs requester whether or not a valid request has been made | 
+estimated_premium | Included if _estimate_premium_ was included in request.  Value in dollars and cents |
+estimated_premium_errors | Contains errors related to coverage selections for _estimated_premium_
+
+### Insurable Rate Parameters
+Parameter | Description | Options
+--------- | ----------- | -----------
+uid | unique identifier for insurable rate |
+title | display title for insurable rate |
+options | choices of coverage for a specific insurable rate |
+category | dictates whether listing is a coverage or deductible option | coverage, deductible
+requirement | indicates whether or not coverage is a required choice | required, optional
+options_type | what type of data options for coverage selection are | currency, none
+options_format | format of options returned for coverage | multiple_choice, none
 
 # Policy Applications
 

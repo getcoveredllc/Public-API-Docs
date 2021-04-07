@@ -739,7 +739,7 @@ completed_application = {
     :status_updated_on => nil,
     :fields => [
         {
-            :title = >"Number of Insured",
+            :title => "Number of Insured",
             :value => 1,
             :options => [1, 2, 3, 4, 5, 6, 7, 8],
             :answer_type => "INTEGER",

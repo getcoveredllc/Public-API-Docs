@@ -96,7 +96,6 @@ Parameter | Required | Description | Options
 --------- | ------- | ----------- | -----------
 agency_id | true | ID of your **Agency** organization | 
 policy_type | true | SLUG of **Policy Type**, defaults to residential | residential, commercial, rent-guarantee, deposit
-carrier_id | false | ID of the **Carrier** | 
 
 # Insurables
 ## Introduction 
@@ -555,7 +554,7 @@ To add a coverage to the coverage selections array, use one of the following has
 
 Adding a Coverage that has multiple options:
 
-`{ "categy" : "coverage", "uid": "1003", "selection": "30000.0" }`
+`{ "category" : "coverage", "uid": "1003", "selection": "30000.0" }`
 
 Adding a Coverage that has no options:
 
@@ -606,7 +605,7 @@ new_policy_application_params = {
     ]
 }
 
-new_policy_application_request = HTTParty.post(":http => //api.getcoveredinsurance.com/v2/policy-applications/new",
+new_policy_application_request = HTTParty.post(":http//api.getcoveredinsurance.com/v2/policy-applications/new",
                                                body: new_policy_application_params.to_json,
                                                headers: {})
 ```
@@ -653,24 +652,26 @@ new_policy_application_request = HTTParty.post(":http => //api.getcoveredinsuran
     "policy_insurables_attributes": [
         { "id": 1 }
     ],
-    "users_attributes":{
-        "primary":true,
-        "spouse":false,
-        "user_attributes":{
-            "email":null,
-            "profile_attributes":{
-                "first_name":null,
-                "last_name":null,
-                "contract_phone":null,
-                "birth_date":null,
-                "job_title":null
+    "policy_users_attributes":[
+        {
+            "primary":true,
+            "spouse":false,
+            "user_attributes":{
+                "email":null,
+                "profile_attributes":{
+                    "first_name":null,
+                    "last_name":null,
+                    "contract_phone":null,
+                    "birth_date":null,
+                    "job_title":null
+                }
             }
         }
-    }
+    ]
 }
 ```
 
-This endpoint retrieves a new Policy Application.
+This endpoint retrieves a new Policy Application.  The response object is used to [create](#create-policy-application) the PolicyApplication which will return a [**Policy Quote**](#policy-quote).
 
 ### HTTP Request
 
@@ -696,12 +697,265 @@ expiration_date | true | Date coverage will end, for residential policies this w
 status | true | Current state of the *Policy Application*. | started, in_progress, complete, abandoned, quote_in_progress, quote_failed, quoted, more_required, accepted, rejected 
 status_updated_on | false | Blank | 
 fields | true | An array of hashes that represent questions required to quote a *Policy Application*.  The __value__ field of each hash will accept any of the options defined in the __options__ array | 
+questions | true | An array of hashes that represent elegibility questions for a given carrier / [**Policy Type**](#policy-type) combination |
+carrier_id | true | ID of the **Carrier** issueing coverage for this Policy Application | 
+policy_type_id | true | ID of the [**Policy Type**](#policy-type) being applied for |  
+agency_id | true | ID of your agency | 
+account_id | false | ID of the **Account** that controlls the Insurable |
+billing_strategy_id | true | Selected [**Billing Strategy**](#billing-strategies) ID for desired payment terms | [Dynamic](#get-all-billing-strategies)
+policy_insurables_attributes | true | An array of hashes that contain the ID of any **Insurables** to be covered from the [Get or Create](#get-or-create) request | 
+policy_users_attributes | true | Array of hashes for users covered by this Policy Application | 
+
+### Policy Users Attributes
+
+Parameter | Required | Description | Options
+--------- | ------- | ----------- | -----------
+primary | true | 1 per Policy Application.  Denotes primary contact | true, false
+spouse | true | Indicates user is married to someone else listed on policy application, this can affect premium in some states | true, false
+user_attributes["email"] | true | valid email address for user | 
+user_attributes["profile_attributes"]["first_name"] | true | Given name of user | 
+user_attributes["profile_attributes"]["last_name"] | true | Family name of user |
+user_attributes["profile_attributes"]["contact_phone"] | true | 10 digit phone number |
+user_attributes["profile_attributes"]["birth_date"] | true | Date string of users birthday, primary insured must be older than 18 |
+user_attributes["profile_attributes"]["job_title"] | false | Occupational title of user |
+
 
 ## Create Policy Application
+```shell
+curl -X POST \ 
+     -H "Content-Type: application/json" \
+     -d '{"reference":null,"external_reference":null,"effective_date":"6/1/2021","expiration_date":"6/1/2022","status":"complete","status_updated_on":null,"fields":[{"title":"Number of Insured","value":1,"options":[1,2,3,4,5,6,7,8],"answer_type":"INTEGER","default_answer":1}],"questions":[],"coverage_selections":[{"categy":"coverage","uid":"1003","selection":"30000.0"},{"categy":"coverage","uid":"1004","selection":"30000.0"},{"categy":"coverage","uid":"1006","selection":"2000.0"},{"category":"coverage","uid":"1076","selection":true},{"categy":"deductible","uid":"1","selection":"1000.0"},{"categy":"deductible","uid":"2","selection":"1000.0"},{"categy":"deductible","uid":"5","selection":"1000.0"}],"carrier_id":5,"policy_type_id":1,"agency_id":1,"account_id":1,"billing_strategy_id":1,"policy_insurables_attributes":[{"id":1}],"policy_users_attributes":[{"primary":true,"spouse":false,"user_attributes":{"email":"johndoe@gmail.com","profile_attributes":{"first_name":"John","last_name":"Doe","contract_phone":"3105551234","birth_date":"1/1/1990","job_title":null}}}]}'
+     https://api.getcoveredinsurance.com/v2/policy-applications
+```
+```ruby
+include HTTParty
+
+completed_application = {
+    :reference => nil,
+    :external_reference => nil,
+    :effective_date => "6/1/2021",
+    :expiration_date => "6/1/2022",
+    :status => "complete",
+    :status_updated_on => nil,
+    :fields => [
+        {
+            :title = >"Number of Insured",
+            :value => 1,
+            :options => [1, 2, 3, 4, 5, 6, 7, 8],
+            :answer_type => "INTEGER",
+            :default_answer => 1
+        }
+    ],
+    :questions=>[],
+    :coverage_selections => [
+        { :category => "coverage", :uid => "1003", :selection => "30000.0" },
+        { :category => "coverage", :uid => "1004", :selection => "30000.0"},
+        { :category => "coverage", :uid => "1006", :selection => "2000.0"},
+        { :category => "coverage", :uid => "1076", :selection => true},
+        { :category => "deductible", :uid => "1", :selection => "1000.0"},
+        { :category => "deductible", :uid => "2", :selection => "1000.0"},
+        { :category => "deductible", :uid => "5", :selection => "1000.0"}
+    ],
+    :carrier_id => 5,
+    :policy_type_id => 1,
+    :agency_id => 1,
+    :account_id => 1,
+    :billing_strategy_id => 1,
+    :policy_insurables_attributes => [
+        { :id => 1 }
+    ],
+    :policy_users_attributes => [
+        {
+            :primary => true,
+            :spouse => false,
+            :user_attributes => {
+                :email => "johndoe@gmail.com",
+                :profile_attributes => {
+                    :first_name => "John",
+                    :last_name => "Doe",
+                    :contract_phone => "3105551234",
+                    :birth_date => "1/1/1990",
+                    :job_title => nil
+                }
+            }
+        }
+    ]
+}
+
+policy_application_request = HTTParty.post(":http//api.getcoveredinsurance.com/v2/policy-applications",
+                                           body: completed_application.to_json,
+                                           headers: {})
+```
+
+Using the data returned in [Get New Policy Application](#get-new-policy-application), the ID of the desired [**Billing Strategy**](#billing-strategies) and the hashes of the relevant [**Insurable Rates**](#insruable-rates) the Policy Application object is complete and considered ready to quote.  A successful create call will return a [**Policy Quote**](#policy-quote) with a final premium and list of invoices with their required due dates to present to the user.
+
+### HTTP Request
+
+`POST http://api.getcoveredinsurance.com/v2/policy-applications`
 
 # Policy Quote
 
 ## Introduction
+
+> Policy Quote JSON Response to [Create Policy Application](#create-policy-application)
+
+```json
+{
+   "quote":{
+      "id":115,
+      "status":"quoted",
+      "premium":{
+         "id":86,
+         "base":17200,
+         "taxes":0,
+         "total_fees":14500,
+         "total":31700,
+         "enabled":false,
+         "enabled_changed":null,
+         "policy_quote_id":115,
+         "policy_id":null,
+         "billing_strategy_id":4,
+         "commission_strategy_id":null,
+         "created_at":"2020-01-30T10:45:06.232Z",
+         "updated_at":"2020-01-30T10:45:06.232Z",
+         "estimate":null,
+         "calculation_base":29200,
+         "deposit_fees":2500,
+         "amortized_fees":12000,
+         "carrier_base":17200
+      }
+   },
+   "invoices":[
+      {
+         "id":945,
+         "number":"LOFQQKR2UX0X",
+         "status":"quoted",
+         "status_changed":null,
+         "description":null,
+         "due_date":"2020-01-30",
+         "available_date":"2020-02-06",
+         "term_first_date":null,
+         "term_last_date":null,
+         "renewal_cycle":0,
+         "total":-2070,
+         "subtotal":6426,
+         "tax":0,
+         "tax_percent":"0.0",
+         "system_data":{
+
+         },
+         "amount_refunded":0,
+         "amount_to_refund_on_completion":0,
+         "has_pending_refund":false,
+         "pending_refund_data":{
+
+         },
+         "user_id":409,
+         "created_at":"2020-01-30T10:45:06.301Z",
+         "updated_at":"2020-01-30T10:45:06.301Z",
+         "policy_id":null,
+         "policy_quote_id":115
+      },
+      {
+         "id":946,
+         "number":"LTN77CRBN2MI",
+         "status":"quoted",
+         "status_changed":null,
+         "description":null,
+         "due_date":"2020-02-29",
+         "available_date":"2020-03-07",
+         "term_first_date":null,
+         "term_last_date":null,
+         "renewal_cycle":0,
+         "total":3070,
+         "subtotal":2070,
+         "tax":0,
+         "tax_percent":"0.0",
+         "system_data":{
+
+         },
+         "amount_refunded":0,
+         "amount_to_refund_on_completion":0,
+         "has_pending_refund":false,
+         "pending_refund_data":{
+
+         },
+         "user_id":409,
+         "created_at":"2020-01-30T10:45:06.379Z",
+         "updated_at":"2020-01-30T10:45:06.379Z",
+         "policy_id":null,
+         "policy_quote_id":115
+      }
+   ],
+   "user":{
+      "id":409
+   }
+}
+```
+
+A Policy Quote object is returned from the successful creation of a complete [**Policy Application**](#policy-applications).  It contains all information needed to bill the User for the correct amount along with a schedule of upcoming payments, tax information and associated fees.  Policy Quotes are not updated, to get a new Premium the original [**Policy Application**](#policy-applications) must be resubmitted with updated values.
+
+### Policy Quote Attributes
+
+Parameter | Required | Description | Options
+--------- | ------- | ----------- | -----------
+id | true | Get Covered's ID for this **Policy Quote** | 
+status | true | current state of the **Policy Quote** being reviewed | awaiting_estimate, estimated, quoted, quote_failed, accepted, abandoned, expired, error 
+premium | true | Hash object of [**Policy Premium**](#policy-premium-attributes) |
+invoices | true | Array of hashes of [**Invoices**](#invoices-attributes) |
+user | true | ID of primary use from [**Policy Application**](#policy-applications) |
+
+### Policy Premium Attributes
+
+Parameter | Required | Description | Options
+--------- | ------- | ----------- | -----------
+id | true | **Policy Premium** ID | 
+base | true | base premium amount in cents | 
+taxes | true | taxes required for this policy in cents | 
+total_fees | true | fees associated with this policy in cents | 
+total | true | amount of all invoices the customer is due to pay in cents | 
+enabled | true | indicates which premium to use for commercial policies that may recieve multiple premiums during quoting | true, false
+enabled_changed | true | date of last change to enabled | 
+policy_quote_id | true | ID of parent **Policy Quote** | 
+policy_id | true | ID of policy, assigned by system after bind | 
+billing_strategy_id | true | ID of [**Billing Strategy**](#billing-strategies) associated with Policy | 
+commission_strategy_id | true | ID of **Commission Strategy** used to determine profit splits | 
+created_at | true | DateTime **Policy Premium** was created | 
+updated_at | true | DateTime **PolicyPremium** was last updated | 
+estimate | true | Temporary amount to display to user before quoting is complete | 
+calculation_base | true | Dollar amount in cents used in calculation of invoice splits | 
+deposit_fees | true | Dollar amount in cents of fees attached to first invoice | 
+amortized_fees | true | Dollar amount in cents of fees split between all invoices | 
+carrier_base | true | Dollar amount in cents **Carrier** expects to collect over life of the **Policy** | 
+
+### Invoices Attributes
+
+Parameter | Required | Description | Options
+--------- | ------- | ----------- | -----------
+id | true | unique identifier of invoice |
+number | true | Get Covered's internal unique identifier for invoices to be shown to users |
+status | true | current invoice status | quoted, upcoming, available, processing, complete, missed, canceled, managed_externally
+status_changed | true | date of last status change |
+description | false | |
+due_date | true | date by which payment is due |
+available_date | true | date on which invoice is available to be paid |
+term_first_date | true | first day of term for billing cycle |
+term_last_date | true | last day of term for billing cycle |
+renewal_cycle | true | number of renewals this billing cycle is on (e.g. 0 for first year, 1 for second) |
+total | true | dollar amount in cents due |
+subtotal | true | dollar amount of invoice before taxes |
+tax | true | dollar amount in cents of taxes to be charged |
+tax_percent | true | tax percentage relevant to this transaction |
+system_data | false | jsonb column of data relevant to this invoice for system tasks |
+amount_refunded | false | dollar amount in cents of invoice refunded |
+amount_to_refund_on_completion | false | dollar amount in cents of invoice to be refunded after collection |
+has_pending_refund | false | boolean on whether a pending refund can be issued for this invoice | true, false
+pending_refund_data | false | jsonb column of relevant system data for refunding invoice |
+user_id | true | ID of **User** who will pay this invoice | 
+created_at | true | DateTime invoice was created | 
+updated_at | true | DateTime invoice was last updated | 
+policy_id | true | ID of [**Policy**](#policy) once bound | 
+policy_quote_id | true | ID of [**Policy Quote**](#policy-quotes) invoice belongs to | 
 
 ## Accept
 

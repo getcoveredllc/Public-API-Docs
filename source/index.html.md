@@ -1,5 +1,5 @@
 ---
-title: Get Covered Policy API
+title: Get Covered Residential Policy API
 
 language_tabs: # must be one of https://git.io/vQNgJ
   - shell
@@ -15,7 +15,7 @@ code_clipboard: true
 
 # Introduction
 
-Welcome to the **Get Covered** API Documentation page.  The following sections will detail the process and options required to bind a policy for users on an external service.  In order to proceed you will need an **Access Token** provided by **Get Covered**.
+Welcome to the **Get Covered** Residential Policy API Documentation page.  The following sections will detail the process and options required to bind a policy for users on an external service.  In order to proceed you will need an **Access Token** provided by **Get Covered**.
 
 All requests accept JSON and respond in kind.  Most endpoints are RESTful, although a few outliers do exist and are detailed in the sections below.
 
@@ -106,7 +106,7 @@ billing_strategies_request = HTTParty.get("https://api.getcoveredinsurance.com/v
 Returns all Billing Strategies for an **Agency**, **Carrier**, **Policy Type** combination.
 
 ### HTTP Request
-`GET http://api.getcoveredinsurance.com/v2/sdk/billing-strategies?query_params`
+`GET https://api.getcoveredinsurance.com/v2/sdk/billing-strategies?query_params`
 
 Parameter | Required | Description | Options
 --------- | ------- | ----------- | -----------
@@ -194,12 +194,11 @@ The **Insurable** Get or Create request finds an existing **Insurable** by its a
 Parameter | Required | Description | Options
 --------- | ------- | ----------- | -----------
 address | true | The full address string for the mailing location of the insurable without the unit number | 
-unit | true | | string or null
+unit | true | Unique iditifier for unit at address (e.g. 101) | string, null, false
 allow_creation | true | Allow Get Covered to create an insurable if one does not exist | true, false
 insurable_id | false | The known **ID** of an **Insurable** that already exists in Get Covered's system | **Insurable** ID or null
-create_if_ambiguous | false | | true, false
-communities_only | false | | true, false
-titleless | false | | true, false
+communities_only | false | Restricts to Communities if **unit** is false | true, false
+titleless | false | Pass as true when **unit** exists but has no number, e.g. for a house with its own street address | true, false
 
 ### Get or Create Response Parameters
 
@@ -610,7 +609,7 @@ curl -X POST \
      -H "Content-Type: application/json" \
      -H "Authorization: BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"  \
      -d '{ "account_id" : 1, "policy_type_id" : 1, "policy_insurables_attributes" : [{ "id" : 1 }] }' \
-     "http://api.getcoveredinsurance.com/v2/sdk/policy-applications/new"
+     "https://api.getcoveredinsurance.com/v2/sdk/policy-applications/new"
 ```
 
 ```ruby
@@ -624,7 +623,7 @@ new_policy_application_params = {
     ]
 }
 
-new_policy_application_request = HTTParty.post(":http//api.getcoveredinsurance.com/v2/sdk/policy-applications/new",
+new_policy_application_request = HTTParty.post("https://api.getcoveredinsurance.com/v2/sdk/policy-applications/new",
                                                body: new_policy_application_params.to_json,
                                                headers: {
                                                  :authorization => "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
@@ -696,7 +695,7 @@ This endpoint retrieves a new Policy Application.  The response object is used t
 
 ### HTTP Request
 
-`POST http://api.getcoveredinsurance.com/v2/sdk/policy-applications/new`
+`POST https://api.getcoveredinsurance.com/v2/sdk/policy-applications/new`
 
 ### Policy Request Application Parameters
 
@@ -802,7 +801,7 @@ completed_application = {
     ]
 }
 
-policy_application_request = HTTParty.post(":http//api.getcoveredinsurance.com/v2/sdk/policy-applications",
+policy_application_request = HTTParty.post("https://api.getcoveredinsurance.com/v2/sdk/policy-applications",
                                            body: completed_application.to_json,
                                            headers: {
                                              :authorization => "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
@@ -813,7 +812,7 @@ Using the data returned in [Get New Policy Application](#get-new-policy-applicat
 
 ### HTTP Request
 
-`POST http://api.getcoveredinsurance.com/v2/sdk/policy-applications`
+`POST https://api.getcoveredinsurance.com/v2/sdk/policy-applications`
 
 # Policy Quote
 
@@ -985,4 +984,183 @@ policy_quote_id | true | ID of [**Policy Quote**](#policy-quotes) invoice belong
 
 ## Introduction
 
+The **Policy** model represents quotes that have been accepted and had payment successfully collected for.  A **Policy** can cover any number of insurables with Insurable Rates selected furing the [**Policy Application**](#policy-applications) process.  A **Policy** is considered *BOUND* until it passes its expiration date without renewal, it has been cancelled or lapsed due to lack of payment longer than the carrier's terms allow.
+
 ## Get Policy
+
+```shell
+curl -X GET \ 
+     -H "Content-Type: application/json" \
+     -H "Authorization: BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"  \
+     "http://api.getcoveredinsurance.com/v2/sdk/policies/:policy-number"
+```
+```ruby
+include HTTParty
+
+get_policy_request = HTTParty.get("https://api.getcoveredinsurance.com/v2/sdk/policies/:policy-number",
+                                  headers: {
+                                    :authorization => "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
+                                  })
+```
+> The above command returns JSON structured like this:
+
+```json
+{
+  "account_id":1,
+  "agency_id":1,
+  "auto_pay":true,
+  "auto_renew":true,
+  "billing_behind_since":null,
+  "billing_dispute_count":null,
+  "billing_dispute_status":null,
+  "billing_enabled":true,
+  "billing_status":"CURRENT",
+  "cancellation_code":null,
+  "cancellation_date_date":null,
+  "carrier_id":1,
+  "created_at":"2020-01-04T00:56:49.690Z",
+  "effective_date":"2020-01-10",
+  "expiration_date":"2021-01-10",
+  "id":1,
+  "last_renewed_on":null,
+  "number":"PRH9116960",
+  "policy_in_system":true,
+  "policy_type_id":1,
+  "renew_count":null,
+  "status":"BOUND",
+  "last_payment_date":"2020-01-04",
+  "next_payment_date":"2020-07-10",
+  "policy_type_title":"Residential Policy",
+  "policy_users_attributes": [
+    {
+      "primary":true,
+      "spouse":false,
+      "user_attributes": {
+        "email":"johndoe@gmail.com",
+        "enabled":false,
+        "id":2,
+        "user_in_system":null,
+        "marital_status":"single",
+        "invitation_accepted_at":null,
+        "profile_attributes":{
+          "birth_date":"1955-09-07",
+          "contact_email":null,
+          "contact_phone":null,
+          "first_name":"John",
+          "full_name":"John Doe",
+          "id":60,
+          "job_title":null,
+          "last_name":"Doe",
+          "middle_name":null,
+          "suffix":null,
+          "title":null
+        }      
+      }
+    }
+  ],
+  "policy_coverages":[
+    {
+      "id":2,
+      "title":null,
+      "designation":"Coverage D",
+      "limit":0,
+      "deductible":0,
+      "policy_id":1,
+      "policy_application_id":1,
+      "created_at":"2020-01-20T12:53:25.514Z",
+      "updated_at":"2020-01-20T12:53:25.514Z",
+      "enabled":true,
+      "special_deductible":null
+    },
+    {
+      "id":1,
+      "title":null,
+      "designation":"Coverage C",
+      "limit":200,
+      "deductible":100,
+      "policy_id":1,
+      "policy_application_id":1,
+      "created_at":"2020-01-20T12:35:48.229Z",
+      "updated_at":"2020-02-14T06:52:04.733Z",
+      "enabled":true,
+      "special_deductible":null
+    }
+  ],
+  "primary_insurable":{
+    "category":"property",
+    "covered":false,
+    "enabled":true,
+    "id":2,
+    "insurable_id":1,
+    "insurable_type_id":4,
+    "title":"101",
+    "parent_community":{
+      "category":"property",
+      "covered":false,
+      "enabled":true,
+      "id":1,
+      "insurable_id":null,
+      "insurable_type_id":1,
+      "title":"Narchost Gardens"
+    }
+  },
+  "premium":{
+    "id":1,
+    "base":25900,
+    "taxes":0,
+    "total_fees":4500,
+    "total":30400,
+    "enabled":false,
+    "enabled_changed":null,
+    "policy_quote_id":1,
+    "policy_id":1,
+    "billing_strategy_id":2,
+    "commission_strategy_id":null,
+    "created_at":"2020-01-04T00:56:34.262Z",
+    "updated_at":"2020-01-04T00:56:50.137Z",
+    "estimate":null,
+    "calculation_base":27900,
+    "deposit_fees":2500,
+    "amortized_fees":2000,
+    "carrier_base":25900,
+    "special_premium":0,
+    "include_special_premium":false
+  },
+  "documents":[
+    {
+      "id":1,
+      "filename":"1256790-evidence-of-insurance.pdf",
+      "url":"http://localhost:3000/rails/active_storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBCZz09IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--f017f1dc3782b6333cb757cfd9fe7108c80f6dcb/1256790-evidence-of-insurance.pdf",
+      "created_at":"2020-01-04T00:38:20.026Z"
+    },
+    {
+      "id":2,
+      "filename":"1256790-evidence-of-insurance.pdf",
+      "url":"http://localhost:3000/rails/active_storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBCdz09IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--0b2684c09eb5a9b719ec3b223ac17d0fed40f9ff/1256790-evidence-of-insurance.pdf",
+      "created_at":"2020-01-04T00:38:20.026Z"
+    },
+    {
+      "id":3,
+      "filename":"1256790-evidence-of-insurance.pdf",
+      "url":"http://localhost:3000/rails/active_storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBDQT09IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--023fd4857a3026ae5337bc74ee87dbd7508b9f39/1256790-evidence-of-insurance.pdf",
+      "created_at":"2020-01-04T00:38:20.026Z"
+    },
+    {
+      "id":4,
+      "filename":"1256790-evidence-of-insurance.pdf",
+      "url":"http://localhost:3000/rails/active_storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBDUT09IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--efa9e609c32dfdc7a7567df6361a0f56d59ac015/1256790-evidence-of-insurance.pdf",
+      "created_at":"2020-01-04T00:38:20.026Z"
+    }
+  ]
+}
+```
+
+Finds a **Policy** by its number.  Response includes data on associated **Users**, [**Insurables**](#insurables), any **Documents** and it's **Premium**
+
+## Cancel Policy
+
+Coming Soon
+
+# Errors
+
+Coming Soon

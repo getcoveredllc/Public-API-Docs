@@ -21,7 +21,23 @@ All requests accept JSON and respond in kind.  Most endpoints are RESTful, altho
 
 # Authentication
 
-**Coming Soon**
+```shell
+curl -X GET \
+     -H "Content-Type: application/json" \
+     -H "Authorization: BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB" \
+     https://api.getcoveredinsurance.com/v2/sdk/billing-strategies?policy_type=residential
+```
+
+```ruby
+include HTTParty
+
+billing_strategies_request = HTTParty.get("https://api.getcoveredinsurance.com/v2/sdk/billing-strategies?policy_type=residential",
+                                          headers: {
+                                            :authorization => "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
+                                          })
+```
+
+Get Covered's API makes use of header based authorization.  The authorization value is a string comprised of two parts seperated by a colon.  A properly formated authorization header looks like `key:secret`.
 
 # Policy Types
 ## Introduction 
@@ -51,14 +67,17 @@ A **Billing Strategy** stores data on how the **Premium** for a **Policy** is bi
 ```shell
 curl -X GET \
      -H "Content-Type: application/json" \
-     https://api.getcoveredinsurance.com/v2/billing-strategies?agency_id=1&policy_type=residential
+     -H "Authorization: BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"  \
+     https://api.getcoveredinsurance.com/v2/sdk/billing-strategies?policy_type=residential
 ```
 
 ```ruby
 include HTTParty
 
-billing_strategies_request = HTTParty.get("https://api.getcoveredinsurance.com/v2/billing-strategies?agency_id=1&policy_type=residential",
-                                          headers: {})
+billing_strategies_request = HTTParty.get("https://api.getcoveredinsurance.com/v2/sdk/billing-strategies?policy_type=residential",
+                                          headers: {
+                                            :authorization => "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
+                                          })
 ```
 
 > The above command returns JSON structured like this:
@@ -87,11 +106,10 @@ billing_strategies_request = HTTParty.get("https://api.getcoveredinsurance.com/v
 Returns all Billing Strategies for an **Agency**, **Carrier**, **Policy Type** combination.
 
 ### HTTP Request
-`GET http://api.getcoveredinsurance.com/v2/billing-strategies?query_params`
+`GET http://api.getcoveredinsurance.com/v2/sdk/billing-strategies?query_params`
 
 Parameter | Required | Description | Options
 --------- | ------- | ----------- | -----------
-agency_id | true | ID of your **Agency** organization | 
 policy_type | true | SLUG of **Policy Type**, defaults to residential | residential, commercial, rent-guarantee, deposit
 
 # Insurables
@@ -104,8 +122,9 @@ The *Insurable* model represents anything for which a policy can be issued to co
 ```shell
 curl -X POST \
      -H "Content-Type: application/json" \
+     -H "Authorization: BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"  \
      -d '{ "address" : "270 Lafayette St, New York, NY 10012", "unit": "1207", "insurable_id": null, "create_if_ambiguous": true, "allow_creation" : true, "communities_only" : false, "titleless" : true }'
-     https://api.getcoveredinsurance.com/v2/insurables/get-or-create
+     https://api.getcoveredinsurance.com/v2/sdk/insurables/get-or-create
 ```
 
 ```ruby
@@ -121,9 +140,11 @@ get_or_create_params = {
     :titleless => true
 }
 
-get_or_create_request = HTTParty.post("https://api.getcoveredinsurance.com/v2/insurables/get-or-create",
+get_or_create_request = HTTParty.post("https://api.getcoveredinsurance.com/v2/sdk/insurables/get-or-create",
                                       body: get_or_create_params.to_json,
-                                      headers: {})
+                                      headers: {
+                                        :authorization => "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
+                                      })
 ```
 
 > The above command returns JSON structured like this:
@@ -167,7 +188,7 @@ get_or_create_request = HTTParty.post("https://api.getcoveredinsurance.com/v2/in
 The **Insurable** Get or Create request finds an existing **Insurable** by its address or creates a new one in the event that it does not exist.
 
 ### HTTP Request
-`POST https://api.getcoveredinsurance.com/v2/insurables/get-or-create`
+`POST https://api.getcoveredinsurance.com/v2/sdk/insurables/get-or-create`
 
 ### Get or Create Request Parameters
 Parameter | Required | Description | Options
@@ -187,8 +208,9 @@ titleless | false | | true, false
 ```shell
 curl -X POST \
      -H "Content-Type: application/json" \
-     -d '{ "insurable_id": 7221, "agency_id": 1, "billing_strategy_id": 9, "effective_date": "2020-07-01", "additional_insured": 0, "coverage_selections": [], "estimate_premium": true }'
-     https://api.getcoveredinsurance.com/v2/policy-applications/get-coverage-options
+     -H "Authorization: BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"  \
+     -d '{ "insurable_id": 7221, "billing_strategy_id": 9, "effective_date": "2020-07-01", "additional_insured": 0, "coverage_selections": [], "estimate_premium": true }'
+     https://api.getcoveredinsurance.com/v2/sdk/policy-applications/get-coverage-options
 ```
 
 ```ruby
@@ -196,7 +218,6 @@ include HTTParty
 
 get_insurable_rates_params = {
   :insurable_id => 7221,
-  :agency_id => 1,
   :billing_strategy_id => 1,
   :effective_date => "2020-07-01",
   :additional_insured => 0,
@@ -204,9 +225,11 @@ get_insurable_rates_params = {
   :estimate_premium => true
 }
 
-get_insurable_rates_request = HTTParty.post("https://api.getcoveredinsurance.com/v2/policy-applications/get-coverage-options",
+get_insurable_rates_request = HTTParty.post("https://api.getcoveredinsurance.com/v2/sdk/policy-applications/get-coverage-options",
                                             body: get_insurable_rates_params.to_json,
-                                            headers: {})
+                                            headers: {
+                                              :authorization => "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
+                                            })
 ```
 
 > The above command returns JSON structured like this:
@@ -533,13 +556,12 @@ get_insurable_rates_request = HTTParty.post("https://api.getcoveredinsurance.com
 The **Insurable** Insurable Rates request finds available coverages for an Insurable identified during the [Get Or Create](#get-or-create) request.  This section is only for Renters Policies ([Policy Type ID: 1](#policy-types)).
    
 ### HTTP Request
-`POST https://api.getcoveredinsurance.com/v2/policy-applications/get-coverage-options`
+`POST https://api.getcoveredinsurance.com/v2/sdk/policy-applications/get-coverage-options`
 
 ### Get Coverage Options Request Parameters
 Parameter | Required | Description | Options
 --------- | ------- | ----------- | -----------
 insurable_id | true | The **ID** of the [**Insurable**](#insurables) identified int the [Get or Create](#get-or-create) request |
-agency_id | true | The **ID** of the **Agency** for your organization |  
 billing_strategy_id | true | The **ID** of the [**Billing Strategy**](#get-all-billing-strategies) being used on the [**Policy Application**](#policy-applications) |
 effective_date | true | Date coverage will begin | 
 additional_insured | true | Number of additional individuals that will be covered under policy, defaults to 0 | 1, 2, 3, 4, 5, 6, 7 
@@ -586,15 +608,15 @@ A *Policy Application* is the data structure used to store information required 
 ```shell
 curl -X POST \ 
      -H "Content-Type: application/json" \
-     -d '{ "agency_id" : 1, "account_id" : 1, "policy_type_id" : 1, "policy_insurables_attributes" : [{ "id" : 1 }] }' \
-     "http://api.getcoveredinsurance.com/v2/policy-applications/new"
+     -H "Authorization: BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"  \
+     -d '{ "account_id" : 1, "policy_type_id" : 1, "policy_insurables_attributes" : [{ "id" : 1 }] }' \
+     "http://api.getcoveredinsurance.com/v2/sdk/policy-applications/new"
 ```
 
 ```ruby
 include HTTParty
 
 new_policy_application_params = {
-    :agency_id => 1,
     :account_id => 1, 
     :policy_type_id => 1, 
     :policy_insurables_attribute => [
@@ -602,9 +624,11 @@ new_policy_application_params = {
     ]
 }
 
-new_policy_application_request = HTTParty.post(":http//api.getcoveredinsurance.com/v2/policy-applications/new",
+new_policy_application_request = HTTParty.post(":http//api.getcoveredinsurance.com/v2/sdk/policy-applications/new",
                                                body: new_policy_application_params.to_json,
-                                               headers: {})
+                                               headers: {
+                                                 :authorization => "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
+                                               })
 ```
 
 > The above command returns JSON structured like this:
@@ -672,13 +696,12 @@ This endpoint retrieves a new Policy Application.  The response object is used t
 
 ### HTTP Request
 
-`POST http://api.getcoveredinsurance.com/v2/policy-applications/new`
+`POST http://api.getcoveredinsurance.com/v2/sdk/policy-applications/new`
 
 ### Policy Request Application Parameters
 
 Parameter | Required | Description
 --------- | ------- | -----------
-agency_id | true | ID provided for each **Agency** in Get Covered's system |
 account_id | false | ID for property management organization which has ownership of the insurable to be covered 
 policy_type_id | true | ID of the **Policy Type** from the [Policy Types](#policy-types) section |
 policy_insurables_attributes | true | array of IDs of **Insurables** to be covered by policy.  Provided in the [Get or Create](#get-or-create) request 
@@ -721,8 +744,9 @@ user_attributes["profile_attributes"]["job_title"] | false | Occupational title 
 ```shell
 curl -X POST \ 
      -H "Content-Type: application/json" \
-     -d '{"reference":null,"external_reference":null,"effective_date":"6/1/2021","expiration_date":"6/1/2022","status":"complete","status_updated_on":null,"fields":[{"title":"Number of Insured","value":1,"options":[1,2,3,4,5,6,7,8],"answer_type":"INTEGER","default_answer":1}],"questions":[],"coverage_selections":[{"categy":"coverage","uid":"1003","selection":"30000.0"},{"categy":"coverage","uid":"1004","selection":"30000.0"},{"categy":"coverage","uid":"1006","selection":"2000.0"},{"category":"coverage","uid":"1076","selection":true},{"categy":"deductible","uid":"1","selection":"1000.0"},{"categy":"deductible","uid":"2","selection":"1000.0"},{"categy":"deductible","uid":"5","selection":"1000.0"}],"carrier_id":5,"policy_type_id":1,"agency_id":1,"account_id":1,"billing_strategy_id":1,"policy_insurables_attributes":[{"id":1}],"policy_users_attributes":[{"primary":true,"spouse":false,"user_attributes":{"email":"johndoe@gmail.com","profile_attributes":{"first_name":"John","last_name":"Doe","contract_phone":"3105551234","birth_date":"1/1/1990","job_title":null}}}]}'
-     https://api.getcoveredinsurance.com/v2/policy-applications
+     -H "Authorization: BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"  \
+     -d '{"reference":null,"external_reference":null,"effective_date":"6/1/2021","expiration_date":"6/1/2022","status":"complete","status_updated_on":null,"fields":[{"title":"Number of Insured","value":1,"options":[1,2,3,4,5,6,7,8],"answer_type":"INTEGER","default_answer":1}],"questions":[],"coverage_selections":[{"categy":"coverage","uid":"1003","selection":"30000.0"},{"categy":"coverage","uid":"1004","selection":"30000.0"},{"categy":"coverage","uid":"1006","selection":"2000.0"},{"category":"coverage","uid":"1076","selection":true},{"categy":"deductible","uid":"1","selection":"1000.0"},{"categy":"deductible","uid":"2","selection":"1000.0"},{"categy":"deductible","uid":"5","selection":"1000.0"}],"carrier_id":5,"policy_type_id":1,"account_id":1,"billing_strategy_id":1,"policy_insurables_attributes":[{"id":1}],"policy_users_attributes":[{"primary":true,"spouse":false,"user_attributes":{"email":"johndoe@gmail.com","profile_attributes":{"first_name":"John","last_name":"Doe","contract_phone":"3105551234","birth_date":"1/1/1990","job_title":null}}}]}'
+     https://api.getcoveredinsurance.com/v2/sdk/policy-applications
 ```
 ```ruby
 include HTTParty
@@ -755,7 +779,6 @@ completed_application = {
     ],
     :carrier_id => 5,
     :policy_type_id => 1,
-    :agency_id => 1,
     :account_id => 1,
     :billing_strategy_id => 1,
     :policy_insurables_attributes => [
@@ -779,16 +802,18 @@ completed_application = {
     ]
 }
 
-policy_application_request = HTTParty.post(":http//api.getcoveredinsurance.com/v2/policy-applications",
+policy_application_request = HTTParty.post(":http//api.getcoveredinsurance.com/v2/sdk/policy-applications",
                                            body: completed_application.to_json,
-                                           headers: {})
+                                           headers: {
+                                             :authorization => "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
+                                           })
 ```
 
 Using the data returned in [Get New Policy Application](#get-new-policy-application), the ID of the desired [**Billing Strategy**](#billing-strategies) and the hashes of the relevant [**Insurable Rates**](#insruable-rates) the Policy Application object is complete and considered ready to quote.  A successful create call will return a [**Policy Quote**](#policy-quote) with a final premium and list of invoices with their required due dates to present to the user.
 
 ### HTTP Request
 
-`POST http://api.getcoveredinsurance.com/v2/policy-applications`
+`POST http://api.getcoveredinsurance.com/v2/sdk/policy-applications`
 
 # Policy Quote
 

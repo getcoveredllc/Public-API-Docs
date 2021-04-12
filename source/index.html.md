@@ -238,6 +238,38 @@ communities_only | false | Restricts to Communities if **unit** is false | true,
 titleless | false | Pass as true when **unit** exists but has no number, e.g. for a house with its own street address | true, false
 
 ### Get or Create Response Parameters
+Parameter | Required | Description | Options
+--------- | ------- | ----------- | -----------
+results_type | true | denotes how well the entered address is able to match records | no_match, confirmed_match or possible_match
+results | true | Array of matches for address provided | 
+
+### Get or Create Response Results Parameters
+Parameter | Required | Description | Options
+--------- | ------- | ----------- | -----------
+id | true | The ID of the **Insurable** to be covered by a [**Policy Application**](#policy-applications), used in future requests | 
+title | true | display title for **Insurable** | 
+account_id | false | BIGING foreign key id of the **Property Management Account** that administers this **Insurable** | 
+agency_id | true | BIGINT foreign key id of the **Agency** this **Insurable** belongs to | 
+insurable_type_id | true | BIGINT foreign key id of the **InsurableType** this **Insurable** belongs to | 
+enabled | true | boolean to denote whether this insurable is able to be interacted with through the API | true, false 
+preferred_ho4 | true | Boolean to denote whether this insurable qualifies for preffered HO4 [**Insurable Rates**](#insurable-rates) | true, false 
+category | false | general type of insurable | property or entity 
+primary_address | true | Key pair object containing the data for the address in the database | 
+primary_address[full] | true | full street address of the **Insurable** | 
+primary_address[street_number] | true | number of address on a given street | 
+primary_address[street_name] | true | name of street on which street number exists | 
+primary_address[street_two] | false | apartment, unit or suiet number | 
+primary_address[city] | true | locality of the street address | 
+primary_address[state] | true | region in which the locality exists | 
+primary_address[zip_code] | true | the postal code for the locality and region | 
+primary_address[county] | false | the subdivision of the state, may overlap with multiple cities | 
+primary_address[country] | false | the nation of which the state belongs | 
+community | true | A community is a grouping of residential **Insurables** that share a common or multiple addresses | 
+community[id] | true | The id of the parent **Insurable** to which the **Insurable** that will be covered by the policy belongs | 
+community[title] | true | display title for **Insurable** | 
+community[enabled] | true | boolean to denote whether this insurable is able to be interacted with through the API | true, false
+community[preferred_ho4] | true | Boolean to denote whether this insurable qualifies for preffered HO4 [**Insurable Rates**](#insurable-rates) | true, false 
+community[insurable_type_id] | true | BIGINT foreign key id of the **InsurableType** this **Insurable** belongs to | 
 
 ## Insruable Rates 
     

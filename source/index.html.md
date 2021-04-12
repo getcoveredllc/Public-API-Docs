@@ -4,6 +4,7 @@ title: Get Covered Residential Policy API
 language_tabs: # must be one of https://git.io/vQNgJ
   - shell
   - ruby
+  - javascript
 
 toc_footers:
   - <a href='#'>Sign Up for a Developer Key</a>
@@ -37,6 +38,14 @@ billing_strategies_request = HTTParty.get("https://api.getcoveredinsurance.com/v
                                           })
 ```
 
+```javascript
+let response = fetch("https://api.getcoveredinsurance.com/v2/sdk/billing-strategies?policy_type=residential", {
+    headers: {
+        Authorization: "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
+    }   
+});
+```
+
 Get Covered's API makes use of header based authorization.  The authorization value is a string comprised of two parts seperated by a colon.  A properly formated authorization header looks like `key:secret`.
 
 # Policy Types
@@ -54,8 +63,8 @@ ID | Title | Slug | Description
 2 | Master Policy | master-policy | TLL product
 3 | Master Policy Coverage | master-policy-coverage | Coverage issued on behalf of a Master Policy
 4 | Commercial | commercial | Business Owner Policy
-4 | Rent Guarantee | rent-guarantee | A stupid product
-5 | Renters Deposit Bond | deposit | A product I don't know how to describe
+4 | Rent Guarantee | rent-guarantee | Coverage for a renter or landlord in the event of a job loss.
+5 | Renters Deposit Bond | deposit | A surety bond or security bond is a guarantee from a third party company that any unpaid rent and or damages to a rental property will be covered, up to a certain amount.
 
 # Billing Strategies
 ## Introduction
@@ -78,6 +87,14 @@ billing_strategies_request = HTTParty.get("https://api.getcoveredinsurance.com/v
                                           headers: {
                                             :authorization => "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
                                           })
+```
+
+```javascript
+let response = fetch("https://api.getcoveredinsurance.com/v2/sdk/billing-strategies?policy_type=residential", {
+    headers: {
+        Authorization: "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
+    }   
+});
 ```
 
 > The above command returns JSON structured like this:
@@ -145,6 +162,26 @@ get_or_create_request = HTTParty.post("https://api.getcoveredinsurance.com/v2/sd
                                       headers: {
                                         :authorization => "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
                                       })
+```
+
+```javascript
+let requestBody = {
+    address: "270 Lafayette St, New York, NY 10012", 
+    unit: "1207", 
+    insurable_id: null, 
+    create_if_ambiguous: true, 
+    allow_creation: true, 
+    communities_only: false, 
+    titleless: true
+};
+
+let request = fetch("https://api.getcoveredinsurance.com/v2/sdk/insurables/get-or-create", {
+    method: 'POST',
+    headers: {
+        Authorization: "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
+    },
+    body: JSON.stringify(requestBody)   
+});
 ```
 
 > The above command returns JSON structured like this:
@@ -229,6 +266,25 @@ get_insurable_rates_request = HTTParty.post("https://api.getcoveredinsurance.com
                                             headers: {
                                               :authorization => "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
                                             })
+```
+
+```javascript
+let requestBody = {
+  insurable_id: 7221,
+  billing_strategy_id: 1,
+  effective_date: "2020-07-01",
+  additional_insured: 0,
+  coverage_selections: [],
+  estimate_premium: true
+};
+
+let request = fetch("https://api.getcoveredinsurance.com/v2/sdk/policy-applications/get-coverage-options", {
+    method: 'POST',
+    headers: {
+        Authorization: "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
+    },
+    body: JSON.stringify(requestBody)   
+});
 ```
 
 > The above command returns JSON structured like this:
@@ -618,7 +674,7 @@ include HTTParty
 new_policy_application_params = {
     :account_id => 1, 
     :policy_type_id => 1, 
-    :policy_insurables_attribute => [
+    :policy_insurables_attributes => [
       { :id => 1 } 
     ]
 }
@@ -628,6 +684,24 @@ new_policy_application_request = HTTParty.post("https://api.getcoveredinsurance.
                                                headers: {
                                                  :authorization => "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
                                                })
+```
+
+```javascript
+let requestBody = {
+    account_id: 1, 
+    policy_type_id: 1, 
+    policy_insurables_attributes: [
+      { id: 1 } 
+    ]
+};
+
+let request = fetch("https://api.getcoveredinsurance.com/v2/sdk/policy-applications/new", {
+    method: 'POST',
+    headers: {
+        Authorization: "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
+    },
+    body: JSON.stringify(requestBody)   
+});
 ```
 
 > The above command returns JSON structured like this:
@@ -808,6 +882,67 @@ policy_application_request = HTTParty.post("https://api.getcoveredinsurance.com/
                                            })
 ```
 
+```javascript
+let requestBody = {
+    reference: null,
+    external_reference: null,
+    effective_date: "6/1/2021",
+    expiration_date: "6/1/2022",
+    status: "complete",
+    status_updated_on: null,
+    fields: [
+        {
+            title: "Number of Insured",
+            value: 1,
+            options: [1, 2, 3, 4, 5, 6, 7, 8],
+            answer_type: "INTEGER",
+            default_answer: 1
+        }
+    ],
+    questions: [],
+    coverage_selections: [
+        { category: "coverage", uid: "1003", selection: "30000.0" },
+        { category: "coverage", uid: "1004", selection: "30000.0"},
+        { category: "coverage", uid: "1006", selection: "2000.0"},
+        { category: "coverage", uid: "1076", selection: true},
+        { category: "deductible", uid: "1", selection: "1000.0"},
+        { category: "deductible", uid: "2", selection: "1000.0"},
+        { category: "deductible", uid: "5", selection: "1000.0"}
+    ],
+    carrier_id: 5,
+    policy_type_id: 1,
+    account_id: 1,
+    billing_strategy_id: 1,
+    policy_insurables_attributes: [
+        { id: 1 }
+    ],
+    policy_users_attributes: [
+        {
+            primary: true,
+            spouse: false,
+            user_attributes: {
+                email: "johndoe@gmail.com",
+                profile_attributes: {
+                    first_name: "John",
+                    last_name: "Doe",
+                    contract_phone: "3105551234",
+                    birth_date: "1/1/1990",
+                    job_title: null
+                }
+            }
+        }
+    ]
+};
+
+let request = fetch("https://api.getcoveredinsurance.com/v2/sdk/policy-applications", {
+    method: 'POST',
+    headers: {
+        Authorization: "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
+    },
+    body: JSON.stringify(requestBody)   
+});
+```
+
 Using the data returned in [Get New Policy Application](#get-new-policy-application), the ID of the desired [**Billing Strategy**](#billing-strategies) and the hashes of the relevant [**Insurable Rates**](#insruable-rates) the Policy Application object is complete and considered ready to quote.  A successful create call will return a [**Policy Quote**](#policy-quote) with a final premium and list of invoices with their required due dates to present to the user.
 
 ### HTTP Request
@@ -986,13 +1121,48 @@ policy_quote_id | true | ID of [**Policy Quote**](#policy-quotes) invoice belong
 
 The **Policy** model represents quotes that have been accepted and had payment successfully collected for.  A **Policy** can cover any number of insurables with Insurable Rates selected furing the [**Policy Application**](#policy-applications) process.  A **Policy** is considered *BOUND* until it passes its expiration date without renewal, it has been cancelled or lapsed due to lack of payment longer than the carrier's terms allow.
 
+## Get All Policies
+
+```shell
+curl -X GET \ 
+     -H "Content-Type: application/json" \
+     -H "Authorization: BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"  \
+     "https://api.getcoveredinsurance.com/v2/sdk/policies"
+```
+```ruby
+include HTTParty
+
+get_policy_request = HTTParty.get("https://api.getcoveredinsurance.com/v2/sdk/policies",
+                                  headers: {
+                                    :authorization => "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
+                                  })
+```
+```javascript
+let response = fetch("https://api.getcoveredinsurance.com/v2/sdk/policies", {
+    headers: {
+        Authorization: "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
+    }   
+});
+```
+
+> The above command returns JSON structured like this:
+
+```json
+[
+  {
+    "message": "example coming soon..."
+  } 
+]
+```
+
+
 ## Get Policy
 
 ```shell
 curl -X GET \ 
      -H "Content-Type: application/json" \
      -H "Authorization: BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"  \
-     "http://api.getcoveredinsurance.com/v2/sdk/policies/:policy-number"
+     "https://api.getcoveredinsurance.com/v2/sdk/policies/:policy-number"
 ```
 ```ruby
 include HTTParty
@@ -1002,35 +1172,42 @@ get_policy_request = HTTParty.get("https://api.getcoveredinsurance.com/v2/sdk/po
                                     :authorization => "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
                                   })
 ```
+```javascript
+let response = fetch("https://api.getcoveredinsurance.com/v2/sdk/policies/:policy-number", {
+    headers: {
+        Authorization: "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
+    }   
+});
+```
 > The above command returns JSON structured like this:
 
 ```json
 {
-  "account_id":1,
-  "agency_id":1,
-  "auto_pay":true,
-  "auto_renew":true,
+  "id":1,
+  "number":"PRH9116960",
+  "effective_date":"2020-01-10",
+  "expiration_date":"2021-01-10",
+  "status":"BOUND",
   "billing_behind_since":null,
   "billing_dispute_count":null,
   "billing_dispute_status":null,
   "billing_enabled":true,
   "billing_status":"CURRENT",
-  "cancellation_code":null,
-  "cancellation_date_date":null,
-  "carrier_id":1,
-  "created_at":"2020-01-04T00:56:49.690Z",
-  "effective_date":"2020-01-10",
-  "expiration_date":"2021-01-10",
-  "id":1,
-  "last_renewed_on":null,
-  "number":"PRH9116960",
-  "policy_in_system":true,
-  "policy_type_id":1,
-  "renew_count":null,
-  "status":"BOUND",
   "last_payment_date":"2020-01-04",
   "next_payment_date":"2020-07-10",
+  "cancellation_code":null,
+  "cancellation_date_date":null,
+  "last_renewed_on":null,
+  "policy_in_system":true,
+  "auto_pay":true,
+  "auto_renew":true,
+  "renew_count":null,
+  "account_id":1,
+  "agency_id":1,
+  "carrier_id":1,
+  "policy_type_id":1,
   "policy_type_title":"Residential Policy",
+  "created_at":"2020-01-04T00:56:49.690Z",
   "policy_users_attributes": [
     {
       "primary":true,
@@ -1156,6 +1333,39 @@ get_policy_request = HTTParty.get("https://api.getcoveredinsurance.com/v2/sdk/po
 ```
 
 Finds a **Policy** by its number.  Response includes data on associated **Users**, [**Insurables**](#insurables), any **Documents** and it's **Premium**
+
+
+### HTTP Request
+
+`GET https://api.getcoveredinsurance.com/v2/sdk/policies/:policy-number`
+
+Parameter | Required | Description | Options
+--------- | ------- | ----------- | -----------
+id | true | | 
+number | true | | 
+effective_date | true | | 
+expiration_date | true | | 
+status | true | | AWAITING_PAYMENT, AWAITING_ACH, PAID, BOUND, BOUND_WITH_WARNING, BIND_ERROR, BIND_REJECTED, RENEWING, RENEWED, EXPIRED, CANCELLED, REINSTATED, EXTERNAL_UNVERIFIED, EXTERNAL_VERIFIED
+billing_behind_since | false | | 
+billing_dispute_count | false | | 
+billing_dispute_status | true | | UNDISPUTED, DISPUTED, AWATING_POSTDISPUTE_PROCESSING, NOT_REQUIRED
+billing_enabled | true | | true, false 
+billing_status | true | | CURRENT, BEHIND, REJECTED, RESCINDED, ERROR, EXTERNAL
+last_payment_date | true | | 
+next_payment_date | true | | 
+cancellation_code | false | | 
+cancellation_date | false | | 
+last_renewed_on | false | | 
+policy_in_system | true | | true, false 
+auto_pay | true | | true, false
+auto_renew | true | | true, false 
+renew_count | false | | 
+account_id | false | | 
+agency_id | true | | 
+carrier_id | true | | 
+policy_type_id | true | | 
+policy_type_title | false | | 
+created_at | true | | 
 
 ## Cancel Policy
 

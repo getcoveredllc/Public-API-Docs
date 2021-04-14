@@ -7,7 +7,7 @@ language_tabs: # must be one of https://git.io/vQNgJ
   - javascript
 
 toc_footers:
-  - <a href='/residential.html'>Residential</a>
+  - <a href='/'>Residential</a>
   - <a href='/rent-guarantee.html'>Rent Guarantee</a>
 
 search: true
@@ -982,9 +982,132 @@ Using the data returned in [Get New Policy Application](#get-new-policy-applicat
 
 `POST https://api.getcoveredinsurance.com/v2/sdk/policy-applications`
 
-## Create and Redirect Policy Application
+## Create for Redirect
 
+```shell
+curl -X POST \ 
+     -H "Content-Type: application/json" \
+     -H "Authorization: BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"  \
+     -d '{"policy_type_id": 1, "redirect_url":"https://some-url.getcoveredinsurance.com", "fields":{"address":"270 Lafayette St, New York, NY 10012"},"users_attributes": [{"email": "user@gmail.com","profile_attributes": {"first_name": "John","last_name": "Doe","contact_phone": "3105551234"}}]}' \
+     "https://api.getcoveredinsurance.com/v2/sdk/policy-applications/redirect"
+```
+
+```ruby
+include HTTParty
+
+application_for_redirect = {
+  :policy_type_id => 1,
+  :redirect_url => "https://some-url.getcoveredinsurance.com",
+  :fields => {
+    :address => "270 Lafayette St, New York, NY 10012"
+  },
+  :users_attributes => [
+    {
+      :email => "user@gmail.com",
+      :profile_attributes => {
+        :first_name => "John",
+        :last_name => "Doe",
+        :contact_phone => "3105551234"
+      }
+    }
+  ]
+}
+
+policy_application_redirect_request = HTTParty.post("https://api.getcoveredinsurance.com/v2/sdk/policy-applications/redirect",
+                                                    body: application_for_redirect.to_json,
+                                                    headers: {
+                                                      :authorization => "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
+                                                    })
+```
+
+```javascript
+let application_for_redirect = {
+  policy_type_id: 1,
+  redirect_url: "https://some-url.getcoveredinsurance.com",
+  fields: {
+    address: "270 Lafayette St, New York, NY 10012"  
+  },
+  users_attributes: [
+    {
+      email: "user@gmail.com",
+      profile_attributes: {
+        first_name: "John",
+        last_name: "Doe",
+        contact_phone: "3105551234"
+      }
+    }
+  ]
+}
+
+let request = fetch("https://api.getcoveredinsurance.com/v2/sdk/policy-applications/redirect", {
+    method: 'POST',
+    headers: {
+        Authorization: "BxrcM2+lhQS6Jt41GYsVDQ==:4Aa1tM+VVZfIpzd1iy1osfiDlwhbP7LZaJmP+2hs39SRMDvB"
+    },
+    body: JSON.stringify(application_for_redirect)   
+});
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "id":1,
+  "policy_type_id": 1,
+  "fields":{
+    "address":"270 Lafayette St, New York, NY 10012"
+  },
+  "users_attributes":[
+    {
+      "id":1,
+      "email":"user@gmail.com",
+      "profile_attributes":{
+        "id":1,
+        "first_name":"John",
+        "last_name":"Doe",
+        "contact_phone":"3105551234"
+      }
+    }
+  ],
+  "redirect_url":"https://some-url.getcoveredinsurance.com/residential/:policy_id"
+}
+```
 Some partners prefer to start a **Policy Application** on their own services but have the end user complete it on **Get Covered's** site.  This process has the advantage that Get Covered will manage and complete billing and policy bind tasks.  Creating a **Policy Aplication** for redirect does not require the use of [**Get New Policy Application**](#get-new-policy-application)
+
+### HTTP Request
+
+`POST https://api.getcoveredinsurance.com/v2/sdk/policy-applications/redirect`
+
+### Policy Application for Redirect Request Parameters
+
+Parameter | Required | Description | Options
+--------- | ------- | ----------- | -----------
+policy_type_id | true | ID of [**Policy Type**](#usage) for relevant product | 
+redirect_url | true | Base url which will be redirected to after create | 
+fields | true | hash object of key value pairs necessary to begin **Policy Application** | 
+fields["address"] | true | Mailing address of **Insurable** to be covered by **Policy Application** | 
+users_attributes | true | Array of hash objects for users that will be attached to **Policy Application**, requires at least 1 | 
+users_attributes["email"] | true | Email address where user attached to this **Policy Application** can be contacted | 
+users_attributes["profile_attributes"] | true | Hash object of attributes for user. | 
+users_attributes["profile_attributes"]["first_name"] | true | Given name of user | 
+users_attributes["profile_attributes"]["last_name"] | true | Family name of user | 
+users_attributes["profile_attributes"]["contact_phone"] | true | 10 digit numeric phone number where user can be reached | 
+
+### Policy Application for Redirect Response Parameters
+
+Parameter | Required | Description | Options
+--------- | ------- | ----------- | -----------
+id | true | Get Covered's unique ID for this **Policy Application** | 
+policy_type_id | true | ID of [**Policy Type**](#usage) for relevant product | 
+redirect_url | true | Base url from request with the required identifier to properly look up the **Policy Application** from the Get Covered front end | 
+fields | true | hash object of key value pairs necessary to begin **Policy Application** | 
+fields["address"] | true | Mailing address of **Insurable** to be covered by **Policy Application** | 
+users_attributes | true | Array of hash objects for users that will be attached to **Policy Application**, requires at least 1 | 
+users_attributes["email"] | true | Email address where user attached to this **Policy Application** can be contacted | 
+users_attributes["profile_attributes"] | true | Hash object of attributes for user. | 
+users_attributes["profile_attributes"]["first_name"] | true | Given name of user | 
+users_attributes["profile_attributes"]["last_name"] | true | Family name of user | 
+users_attributes["profile_attributes"]["contact_phone"] | true | 10 digit numeric phone number where user can be reached | 
 
 # Policy Quote
 
